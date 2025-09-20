@@ -65,4 +65,3 @@ curl http://localhost:3000/api/debug/users
 
 - `app.js` - Main Express server
 - `middleware/rateLimiter.js` - Rate limiting logic
-- `postman_collection_simple.json` - Postman tests
