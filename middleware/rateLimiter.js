@@ -16,15 +16,18 @@ const config = {
 function rateLimiter(req, res, next) {
   // Get or create user ID from cookies/headers
   let userId = req.headers['x-user-id'] || req.cookies?.userId;
+  let isNewUser = false;
   
   if (!userId) {
     userId = uuidv4();
+    isNewUser = true;
     res.cookie('userId', userId, { 
       maxAge: 24 * 60 * 60 * 1000, // 1 day
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production'
     });
     res.setHeader('X-User-ID', userId);
+    console.log(`🆕 New user created: ${userId.substring(0, 8)}...`);
   }
 
   const now = Date.now();
@@ -48,6 +51,8 @@ function rateLimiter(req, res, next) {
   if (userData.requests.length >= config.limit) {
     const oldestRequest = Math.min(...userData.requests);
     const resetTime = Math.ceil((oldestRequest + config.windowMs - now) / 1000);
+    
+    console.log(`🚫 Rate limited: ${userId.substring(0, 8)}... (${userData.requests.length}/${config.limit} requests)`);
 
     // Set rate limit headers
     res.setHeader('X-RateLimit-Limit', config.limit);

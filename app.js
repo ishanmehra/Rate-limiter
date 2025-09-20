@@ -7,7 +7,18 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
-app.use(express.json());
+app.use(express.json({
+  // Custom error handler for JSON parsing
+  verify: (req, res, buf, encoding) => {
+    try {
+      JSON.parse(buf);
+    } catch (err) {
+      err.statusCode = 400;
+      err.body = buf.toString();
+      throw err;
+    }
+  }
+}));
 app.use(cookieParser());
 
 // Apply rate limiting middleware globally
@@ -49,12 +60,58 @@ app.get('/api/status', (req, res) => {
   });
 });
 
+// Debug endpoint to view current users and their rate limit status
+app.get('/api/debug/users', (req, res) => {
+  const { getRateLimitStore, getConfig } = require('./middleware/rateLimiter');
+  const store = getRateLimitStore();
+  const config = getConfig();
+  
+  const users = [];
+  const now = Date.now();
+  
+  for (const [userId, userData] of store.entries()) {
+    // Filter out old requests for accurate count
+    const validRequests = userData.requests.filter(timestamp => 
+      timestamp > (now - config.windowMs)
+    );
+    
+    users.push({
+      userId: userId,
+      totalRequests: validRequests.length,
+      remainingRequests: Math.max(0, config.limit - validRequests.length),
+      lastRequest: validRequests.length > 0 ? new Date(Math.max(...validRequests)).toISOString() : null,
+      requestTimestamps: validRequests.map(ts => new Date(ts).toISOString()),
+      isRateLimited: validRequests.length >= config.limit
+    });
+  }
+  
+  res.json({
+    totalUsers: users.length,
+    rateLimitConfig: {
+      limit: config.limit,
+      windowSeconds: config.windowMs / 1000
+    },
+    users: users,
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error('Error:', err);
-  res.status(500).json({
+  console.error('Error:', err.message || err);
+  
+  // Handle JSON parsing errors specifically
+  if (err.type === 'entity.parse.failed' || err.statusCode === 400) {
+    return res.status(400).json({
+      error: 'invalid_json',
+      message: 'Invalid JSON format in request body.'
+    });
+  }
+  
+  // Handle other errors
+  res.status(err.statusCode || 500).json({
     error: 'internal_server_error',
-    message: 'Something went wrong on our end.'
+    message: err.message || 'Something went wrong on our end.'
   });
 });
 
