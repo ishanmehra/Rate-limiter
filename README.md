@@ -33,6 +33,7 @@ PORT=3000
 - `GET /api/test` - Test endpoint
 - `POST /api/data` - Submit data
 - `GET /api/status` - Server status
+- `GET /api/debug/users` - View current users and their rate limit status
 
 ## Rate Limiting
 
@@ -52,6 +53,13 @@ curl http://localhost:3000/api/test
 ```
 
 First 5 will succeed, 6th will return 429.
+
+## Check Users
+
+View current users and their request counts:
+```bash
+curl http://localhost:3000/api/debug/users
+```
 
 ## Files
 
