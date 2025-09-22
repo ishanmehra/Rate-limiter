@@ -1,0 +1,224 @@
+{
+  "name": "Rate Limiter API",
+  "version": "1",
+  "items": [
+    {
+      "type": "http",
+      "name": "Basic Endpoint Test",
+      "filename": "Basic Endpoint Test.bru",
+      "seq": 1,
+      "settings": {},
+      "tags": [],
+      "request": {
+        "url": "http://localhost:3000/api/test",
+        "method": "GET",
+        "headers": [],
+        "params": [],
+        "body": {
+          "mode": "none",
+          "formUrlEncoded": [],
+          "multipartForm": [],
+          "file": []
+        },
+        "script": {},
+        "vars": {},
+        "assertions": [
+          {
+            "name": "res.status",
+            "value": "eq 200",
+            "enabled": true,
+            "uid": "XMjIwFcl19DAPDaQo3Smf"
+          },
+          {
+            "name": "res.headers[\"x-ratelimit-limit\"]",
+            "value": "eq 5",
+            "enabled": true,
+            "uid": "hDyeo4nudQtD6rJEflHtv"
+          },
+          {
+            "name": "res.headers[\"x-ratelimit-window\"]",
+            "value": "eq 60",
+            "enabled": true,
+            "uid": "ZjutzRbNHmmVpCeEOFkm8"
+          },
+          {
+            "name": "res.headers[\"x-ratelimit-remaining\"]",
+            "value": "gte 0",
+            "enabled": true,
+            "uid": "Sc7B9raTMGj7rafxpvhO3"
+          }
+        ],
+        "tests": "test(\"should return success message\", function() {\n  expect(res.body.message).to.equal(\"API is working\");\n});\n\ntest(\"should have rate limit headers\", function() {\n  expect(res.headers[\"x-ratelimit-limit\"]).to.exist;\n  expect(res.headers[\"x-ratelimit-window\"]).to.exist;\n  expect(res.headers[\"x-ratelimit-remaining\"]).to.exist;\n});",
+        "docs": "",
+        "auth": {
+          "mode": "none"
+        }
+      }
+    },
+    {
+      "type": "http",
+      "name": "Debug Users Endpoint",
+      "filename": "Debug Users.bru",
+      "seq": 3,
+      "settings": {},
+      "tags": [],
+      "request": {
+        "url": "http://localhost:3000/api/debug/users",
+        "method": "GET",
+        "headers": [],
+        "params": [],
+        "body": {
+          "mode": "none",
+          "formUrlEncoded": [],
+          "multipartForm": [],
+          "file": []
+        },
+        "script": {},
+        "vars": {},
+        "assertions": [
+          {
+            "name": "res.status",
+            "value": "eq 200",
+            "enabled": true,
+            "uid": "4Be4Y5xd9ygBqBRGUqkQ0"
+          }
+        ],
+        "tests": "test(\"should return users data\", function() {\n  expect(res.body).to.be.an('object');\n  expect(res.body.totalUsers).to.be.a('number');\n  expect(res.body.users).to.be.an('object');\n});\n\ntest(\"should have rate limit headers\", function() {\n  expect(res.headers[\"x-ratelimit-limit\"]).to.equal(\"5\");\n  expect(res.headers[\"x-ratelimit-window\"]).to.equal(\"60\");\n  expect(res.headers[\"x-ratelimit-remaining\"]).to.exist;\n});",
+        "docs": "",
+        "auth": {
+          "mode": "none"
+        }
+      }
+    },
+    {
+      "type": "http",
+      "name": "Different User Test",
+      "filename": "Different User Test.bru",
+      "seq": 4,
+      "settings": {},
+      "tags": [],
+      "request": {
+        "url": "http://localhost:3000/api/test",
+        "method": "GET",
+        "headers": [
+          {
+            "name": "Cookie",
+            "value": "",
+            "enabled": true
+          }
+        ],
+        "params": [],
+        "body": {
+          "mode": "none",
+          "formUrlEncoded": [],
+          "multipartForm": [],
+          "file": []
+        },
+        "script": {
+          "req": "// Clear cookies to simulate a different user\n// In Bruno, you can manually clear cookies or use a different environment"
+        },
+        "vars": {},
+        "assertions": [
+          {
+            "name": "res.status",
+            "value": "eq 200",
+            "enabled": true,
+            "uid": "I1oPweTYuWH279gfNk6I4"
+          }
+        ],
+        "tests": "test(\"should work for different user\", function() {\n  expect(res.body.message).to.equal(\"API is working\");\n  expect(res.headers[\"x-ratelimit-remaining\"]).to.exist;\n  // Should have fresh rate limit for new user\n  expect(parseInt(res.headers[\"x-ratelimit-remaining\"])).to.be.at.least(4);\n});",
+        "docs": "",
+        "auth": {
+          "mode": "none"
+        }
+      }
+    },
+    {
+      "type": "http",
+      "name": "Server Health Check",
+      "filename": "Health Check.bru",
+      "seq": 5,
+      "settings": {},
+      "tags": [],
+      "request": {
+        "url": "http://localhost:3000/",
+        "method": "GET",
+        "headers": [],
+        "params": [],
+        "body": {
+          "mode": "none",
+          "formUrlEncoded": [],
+          "multipartForm": [],
+          "file": []
+        },
+        "script": {},
+        "vars": {},
+        "assertions": [
+          {
+            "name": "res.status",
+            "value": "eq 200",
+            "enabled": true,
+            "uid": "B4Xcq7RQggkbsmvKBccl2"
+          }
+        ],
+        "tests": "test(\"should return server running message\", function() {\n  expect(res.body.message).to.equal(\"Rate limiter server is running\");\n});\n\ntest(\"should have rate limit headers\", function() {\n  expect(res.headers[\"x-ratelimit-limit\"]).to.equal(\"5\");\n  expect(res.headers[\"x-ratelimit-window\"]).to.equal(\"60\");\n  expect(res.headers[\"x-ratelimit-remaining\"]).to.exist;\n});",
+        "docs": "",
+        "auth": {
+          "mode": "none"
+        }
+      }
+    },
+    {
+      "type": "http",
+      "name": "Rate Limit Test - 5 Requests",
+      "filename": "Rate Limit Test.bru",
+      "seq": 2,
+      "settings": {},
+      "tags": [],
+      "request": {
+        "url": "http://localhost:3000/api/test",
+        "method": "GET",
+        "headers": [],
+        "params": [],
+        "body": {
+          "mode": "none",
+          "formUrlEncoded": [],
+          "multipartForm": [],
+          "file": []
+        },
+        "script": {
+          "req": "// This test will be run multiple times to test rate limiting\n// Bruno doesn't have built-in loops, so this would need to be run manually 5+ times"
+        },
+        "vars": {},
+        "assertions": [
+          {
+            "name": "res.status",
+            "value": "in [200, 429]",
+            "enabled": true,
+            "uid": "GWbnLjyafCF1huxv7xydI"
+          }
+        ],
+        "tests": "test(\"should handle rate limiting correctly\", function() {\n  if (res.status === 200) {\n    expect(res.body.message).to.equal(\"API is working\");\n    expect(parseInt(res.headers[\"x-ratelimit-remaining\"])).to.be.at.least(0);\n  } else if (res.status === 429) {\n    expect(res.body.error).to.equal(\"Rate limit exceeded\");\n    expect(res.body.message).to.equal(\"You have exceeded the rate limit of 5 requests per minute\");\n    expect(res.headers[\"x-ratelimit-remaining\"]).to.equal(\"0\");\n    expect(res.headers[\"retry-after\"]).to.exist;\n  }\n});",
+        "docs": "",
+        "auth": {
+          "mode": "none"
+        }
+      }
+    }
+  ],
+  "environments": [],
+  "root": {
+    "docs": "# Bruno API Collection - Rate Limiter Testing\n\nThis Bruno collection tests the Express rate limiter API with 5 requests per minute per user.\n\n## Setup\n\n1. Start the server: `npm run dev`\n2. Open Bruno API client\n3. Import this collection folder (`bruno-collection`)\n\n## Test Cases\n\n### 1. Basic Endpoint Test\n- **URL**: `GET /api/test`\n- **Purpose**: Tests basic API functionality and rate limit headers\n- **Expected**: 200 status with rate limit headers\n\n### 2. Rate Limit Test\n- **URL**: `GET /api/test` \n- **Purpose**: Tests rate limiting behavior\n- **Usage**: Run this request 6+ times quickly to trigger 429 error\n- **Expected**: First 5 requests succeed, 6th returns 429\n\n### 3. Debug Users\n- **URL**: `GET /api/debug/users`\n- **Purpose**: Shows active users and their request counts\n- **Expected**: JSON with `totalUsers` and `users` object\n\n### 4. Different User Test\n- **URL**: `GET /api/test`\n- **Purpose**: Tests rate limiting with different users\n- **Usage**: Clear cookies before running to simulate new user\n- **Expected**: Fresh rate limit for new user\n\n### 5. Health Check\n- **URL**: `GET /`\n- **Purpose**: Basic server health check\n- **Expected**: Server running message\n\n## Rate Limit Headers\n\nAll responses include:\n- `X-RateLimit-Limit`: 5\n- `X-RateLimit-Window`: 60 \n- `X-RateLimit-Remaining`: Number of requests left\n- `Retry-After`: Seconds to wait (on 429 errors)\n\n## Testing Rate Limiting\n\n1. Run \"Basic Endpoint Test\" 5 times\n2. On 6th request, expect 429 error\n3. Wait 60 seconds or check \"Debug Users\" to see reset\n4. Use \"Different User Test\" with cleared cookies for independent limits\n\n## Notes\n\n- Each user gets 5 requests per 60-second window\n- Users identified by UUID in HTTP-only cookies\n- Rate limits reset automatically after 60 seconds\n- Use debug endpoint to monitor active users"
+  },
+  "brunoConfig": {
+    "version": "1",
+    "name": "Rate Limiter API",
+    "type": "collection",
+    "ignore": [
+      "node_modules",
+      ".git"
+    ],
+    "size": 0.0033845901489257812,
+    "filesCount": 5
+  }
+}

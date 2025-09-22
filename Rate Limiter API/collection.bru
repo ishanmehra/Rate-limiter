@@ -1,0 +1,62 @@
+docs {
+  # Bruno API Collection - Rate Limiter Testing
+  
+  This Bruno collection tests the Express rate limiter API with 5 requests per minute per user.
+  
+  ## Setup
+  
+  1. Start the server: `npm run dev`
+  2. Open Bruno API client
+  3. Import this collection folder (`bruno-collection`)
+  
+  ## Test Cases
+  
+  ### 1. Basic Endpoint Test
+  - **URL**: `GET /api/test`
+  - **Purpose**: Tests basic API functionality and rate limit headers
+  - **Expected**: 200 status with rate limit headers
+  
+  ### 2. Rate Limit Test
+  - **URL**: `GET /api/test` 
+  - **Purpose**: Tests rate limiting behavior
+  - **Usage**: Run this request 6+ times quickly to trigger 429 error
+  - **Expected**: First 5 requests succeed, 6th returns 429
+  
+  ### 3. Debug Users
+  - **URL**: `GET /api/debug/users`
+  - **Purpose**: Shows active users and their request counts
+  - **Expected**: JSON with `totalUsers` and `users` object
+  
+  ### 4. Different User Test
+  - **URL**: `GET /api/test`
+  - **Purpose**: Tests rate limiting with different users
+  - **Usage**: Clear cookies before running to simulate new user
+  - **Expected**: Fresh rate limit for new user
+  
+  ### 5. Health Check
+  - **URL**: `GET /`
+  - **Purpose**: Basic server health check
+  - **Expected**: Server running message
+  
+  ## Rate Limit Headers
+  
+  All responses include:
+  - `X-RateLimit-Limit`: 5
+  - `X-RateLimit-Window`: 60 
+  - `X-RateLimit-Remaining`: Number of requests left
+  - `Retry-After`: Seconds to wait (on 429 errors)
+  
+  ## Testing Rate Limiting
+  
+  1. Run "Basic Endpoint Test" 5 times
+  2. On 6th request, expect 429 error
+  3. Wait 60 seconds or check "Debug Users" to see reset
+  4. Use "Different User Test" with cleared cookies for independent limits
+  
+  ## Notes
+  
+  - Each user gets 5 requests per 60-second window
+  - Users identified by UUID in HTTP-only cookies
+  - Rate limits reset automatically after 60 seconds
+  - Use debug endpoint to monitor active users
+}

@@ -1,0 +1,11 @@
+{
+  "version": "1",
+  "name": "Rate Limiter API",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ],
+  "size": 0.0033845901489257812,
+  "filesCount": 5
+}

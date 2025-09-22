@@ -1,0 +1,29 @@
+meta {
+  name: Debug Users Endpoint
+  type: http
+  seq: 3
+}
+
+get {
+  url: http://localhost:3000/api/debug/users
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+}
+
+tests {
+  test("should return users data", function() {
+    expect(res.body).to.be.an('object');
+    expect(res.body.totalUsers).to.be.a('number');
+    expect(res.body.users).to.be.an('object');
+  });
+  
+  test("should have rate limit headers", function() {
+    expect(res.headers["x-ratelimit-limit"]).to.equal("5");
+    expect(res.headers["x-ratelimit-window"]).to.equal("60");
+    expect(res.headers["x-ratelimit-remaining"]).to.exist;
+  });
+}

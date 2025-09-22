@@ -1,0 +1,27 @@
+meta {
+  name: Server Health Check
+  type: http
+  seq: 5
+}
+
+get {
+  url: http://localhost:3000/
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+}
+
+tests {
+  test("should return server running message", function() {
+    expect(res.body.message).to.equal("Rate limiter server is running");
+  });
+  
+  test("should have rate limit headers", function() {
+    expect(res.headers["x-ratelimit-limit"]).to.equal("5");
+    expect(res.headers["x-ratelimit-window"]).to.equal("60");
+    expect(res.headers["x-ratelimit-remaining"]).to.exist;
+  });
+}

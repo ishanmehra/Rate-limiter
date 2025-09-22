@@ -1,0 +1,30 @@
+meta {
+  name: Basic Endpoint Test
+  type: http
+  seq: 1
+}
+
+get {
+  url: http://localhost:3000/api/test
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+  res.headers["x-ratelimit-limit"]: eq 5
+  res.headers["x-ratelimit-window"]: eq 60
+  res.headers["x-ratelimit-remaining"]: gte 0
+}
+
+tests {
+  test("should return success message", function() {
+    expect(res.body.message).to.equal("API is working");
+  });
+  
+  test("should have rate limit headers", function() {
+    expect(res.headers["x-ratelimit-limit"]).to.exist;
+    expect(res.headers["x-ratelimit-window"]).to.exist;
+    expect(res.headers["x-ratelimit-remaining"]).to.exist;
+  });
+}

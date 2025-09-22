@@ -1,0 +1,33 @@
+meta {
+  name: Different User Test
+  type: http
+  seq: 4
+}
+
+get {
+  url: http://localhost:3000/api/test
+  body: none
+  auth: none
+}
+
+headers {
+  Cookie: 
+}
+
+assert {
+  res.status: eq 200
+}
+
+script:pre-request {
+  // Clear cookies to simulate a different user
+  // In Bruno, you can manually clear cookies or use a different environment
+}
+
+tests {
+  test("should work for different user", function() {
+    expect(res.body.message).to.equal("API is working");
+    expect(res.headers["x-ratelimit-remaining"]).to.exist;
+    // Should have fresh rate limit for new user
+    expect(parseInt(res.headers["x-ratelimit-remaining"])).to.be.at.least(4);
+  });
+}
